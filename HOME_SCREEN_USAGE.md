@@ -13,7 +13,7 @@ The `HomeScreen` widget (in `lib/home_screen1.dart`) implements the new UI desig
 ### 2. Empty State
 - Shown when there are no tasks
 - Displays an SVG illustration (object3.svg)
-- Shows the message: "There are no tasks yet, Press the button To add New Task"
+- Shows the message: "There are no tasks yet, press the button to add a new task"
 - Centered layout with proper spacing
 
 ### 3. Floating Action Button (FAB)

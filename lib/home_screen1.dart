@@ -18,11 +18,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> tasks = [];
 
   void _addTask() {
+    // TODO: Implement task creation dialog/screen
     // This will be called when FAB is pressed
     // For now, it's a placeholder for future implementation
-    setState(() {
-      // Add task logic will go here
-    });
   }
 
   @override
@@ -111,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 32),
             // Empty state message
             Text(
-              'There are no tasks yet, Press the button To add New Task',
+              'There are no tasks yet, press the button to add a new task',
               textAlign: TextAlign.center,
               style: AppFonts.lexendDeca(
                 fontSize: 16,

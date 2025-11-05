@@ -66,8 +66,8 @@
 │           32px spacing                   │
 │                                          │
 │    "There are no tasks yet,              │
-│     Press the button To add              │
-│     New Task"                            │
+│     press the button to add              │
+│     a new task"                          │
 │                                          │
 └─────────────────────────────────────────┘
 ```
