@@ -2,26 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'core/app_resources.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   final String userName;
 
   const HomeScreen({
     super.key,
     this.userName = 'Ahmed Saber',
   });
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> tasks = [];
-
-  void _addTask() {
-    // TODO: Implement task creation dialog/screen
-    // This will be called when FAB is pressed
-    // For now, it's a placeholder for future implementation
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,15 +20,15 @@ class _HomeScreenState extends State<HomeScreen> {
             // Header Section
             _buildHeader(),
             
-            // Content Section
+            // Empty State Section
             Expanded(
-              child: tasks.isEmpty ? _buildEmptyState() : _buildTaskList(),
+              child: _buildEmptyState(),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addTask,
+        onPressed: () {},
         backgroundColor: AppColors.primary,
         child: const Icon(
           Icons.add,
@@ -78,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                widget.userName,
+                userName,
                 style: AppFonts.lexendDeca(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -121,22 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTaskList() {
-    // Placeholder for when tasks exist
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: tasks.length,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            title: Text(tasks[index]['title'] ?? ''),
-          ),
-        );
-      },
     );
   }
 }
