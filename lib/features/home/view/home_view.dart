@@ -5,6 +5,9 @@ import '/core/utils/app_colors.dart';
 import '/features/auth/data/models/user_model.dart';
 import '/features/home/cubit/get_tasks_cubit/get_tsks_cubit.dart';
 import '/features/home/cubit/get_tasks_cubit/get_tsks_state.dart';
+import '/features/home/data/repo/home_repo.dart';
+import '/features/home/cubit/get_user_cubit/get_user_cubit.dart';
+import 'package:todo/features/home/cubit/get_user_cubit/get_user_state.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -14,28 +17,40 @@ class HomeView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: BlocProvider(
-          create: (context) => GetUserModel(),
-          child: Row(
-            children: [
-              SizedBox(
-                height: 50,
-                width: 50,
-                child: CachedNetworkImage(
-                  // imageUrl: user.imagePath??'', TODO
-                  imageUrl: '',
-                  placeholder: (context, url) => CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
-                ),
-              ),
-              SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Welcome'),
-                  // Text(user.username??''), TODO
-                ],
-              ),
-            ],
+          create: (context) => GetUserCubit()..getusers(),
+          child: BlocBuilder<GetUserCubit, GetUserState>(
+            builder: (context, state) {
+              if (state is GetUserSuccessState) {
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: CachedNetworkImage(
+                        imageUrl: state.users.imagePath ?? '', //TODO
+
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Welcome'),
+                        Text(state.users.username ?? ''),
+                      ],
+                    ),
+                  ],
+                );
+              } else if (state is GetUserLoadingState) {
+                return Center(child: CircularProgressIndicator());
+              } else if (state is GetUserErrorState) {
+                return Center(child: Text(state.error));
+              }
+              return Row();
+            },
           ),
         ),
       ),
