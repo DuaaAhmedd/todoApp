@@ -37,6 +37,16 @@ dependencies:
   flutter_screenutil: ^5.7.0
   flutter_svg: ^2.0.10+1
   google_fonts: ^6.1.0
+  flutter_bloc: 
+  dio: 
+  equatable: 
+  flutter_easyloading:  
+  dartz: 
+  intl: 
+  shared_preferences:  
+  flutter_staggered_grid_view: 
+  cached_network_image: 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

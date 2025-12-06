@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'core/app_resources.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LetsStartScreen extends StatelessWidget {
   const LetsStartScreen({super.key});
@@ -24,8 +25,8 @@ class LetsStartScreen extends StatelessWidget {
                 ),
                 child: SvgPicture.asset(
                   'assets/OBJECTS012.svg',
-                  width: 301.7,
-                  height: 342.86,
+                  width: 301.7.w,
+                  height: 342.86.h,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -53,7 +54,7 @@ class LetsStartScreen extends StatelessWidget {
               const Spacer(),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 52.h,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: AppButtonStyles.primaryButton(),
