@@ -11,16 +11,16 @@ class GetTasksReponseModel {
     if (json['tasks'] != null) {
       tasks = <TaskModel>[];
       json['tasks'].forEach((v) {
-        tasks!.add(new TaskModel.fromJson(v));
+        tasks!.add(TaskModel.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    if (this.tasks != null) {
-      data['tasks'] = this.tasks!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    if (tasks != null) {
+      data['tasks'] = tasks!.map((v) => v.toJson()).toList();
     }
     return data;
   }

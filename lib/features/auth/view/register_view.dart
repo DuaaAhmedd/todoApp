@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '/core/helper/app_navigator.dart';
 import '/core/helper/app_popup.dart';
 import '/core/helper/app_validator.dart';
-import '/core/widgets/custom_filled_btn.dart';
-import '/core/widgets/custom_form_field.dart';
+import '/core/utils/app_colors.dart';
 import '/features/auth/cubit/register_cubit/register_cubit.dart';
 
 import '../cubit/register_cubit/register_state.dart';
@@ -18,7 +17,6 @@ class RegisterView extends StatelessWidget {
     return BlocProvider(
       create: (context) => RegisterCubit(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Register')),
         body: BlocConsumer<RegisterCubit, RegisterState>(
           listener: (context, state) {
             if (state is RegisterErrorState) {
@@ -38,70 +36,249 @@ class RegisterView extends StatelessWidget {
             }
           },
           builder: (context, state) {
-            return Form(
-              key: RegisterCubit.get(context).formKey,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    CustomFormField(
-                      controller: RegisterCubit.get(context).username,
-                      prefix: Icon(Icons.person),
-                      hintText: 'Username',
-                      validator: AppValidator.validateRequired,
-                    ),
-                    SizedBox(height: 20),
-                    CustomFormField(
-                      controller: RegisterCubit.get(context).password,
-                      prefix: Icon(Icons.lock),
-                      hintText: 'Password',
-                      obscureText: RegisterCubit.get(context).passwordSecure,
-                      suffix: IconButton(
-                        onPressed: RegisterCubit.get(
-                          context,
-                        ).changePasswordSecure,
-                        icon: RegisterCubit.get(context).passwordSecure
-                            ? Icon(Icons.lock_open)
-                            : Icon(Icons.lock),
-                      ),
-                      validator: AppValidator
-                          .validateRequired, // TODO: check Length mi 6
-                    ),
-                    SizedBox(height: 20),
-                    CustomFormField(
-                      controller: RegisterCubit.get(context).confirmPassword,
-                      prefix: Icon(Icons.lock),
-                      hintText: 'Confirm Password',
-                      obscureText: RegisterCubit.get(
-                        context,
-                      ).confirmPasswordSecure,
-                      validator: AppValidator
-                          .validateRequired, // TODO: Check equal to password
-                    ),
-                    SizedBox(height: 40),
-                    state is RegisterLoadingState
-                        ? CircularProgressIndicator()
-                        : CustomFilledBtn(
-                            onPressed: RegisterCubit.get(
-                              context,
-                            ).onRegisterPressed,
-                            text: 'Register',
-                          ),
-                    SizedBox(height: 40),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Already have an account?'),
-                        TextButton(
-                          onPressed: () =>
-                              AppNavigator.goTo(context, const LoginView()),
-                          child: const Text('Login'),
-                        ),
-                      ],
-                    ),
-                  ],
+            return Column(
+              children: [
+                // Palestinian Flag Background - Upper 40%
+                Expanded(
+                  flex: 4,
+                  child: Image.asset(
+                    'assets/flag.png',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
                 ),
-              ),
+                // Form Section - Lower 60%
+                Expanded(
+                  flex: 6,
+                  child: Container(
+                    color: Color(0xFFF5F5F5), // Light grey background
+                    child: Form(
+                      key: RegisterCubit.get(context).formKey,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 30,
+                        ),
+                        child: Column(
+                          children: [
+                            // Username Field
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 5,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextFormField(
+                                controller: RegisterCubit.get(context).username,
+                                validator: AppValidator.validateRequired,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.person,
+                                    color: Colors.grey[600],
+                                  ),
+                                  hintText: 'Username',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            // Password Field
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 5,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextFormField(
+                                controller: RegisterCubit.get(context).password,
+                                obscureText: RegisterCubit.get(
+                                  context,
+                                ).passwordSecure,
+                                validator: AppValidator.validateRequired,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.lock,
+                                    color: Colors.grey[600],
+                                  ),
+                                  suffixIcon: IconButton(
+                                    onPressed: RegisterCubit.get(
+                                      context,
+                                    ).changePasswordSecure,
+                                    icon: Icon(
+                                      RegisterCubit.get(context).passwordSecure
+                                          ? Icons.lock
+                                          : Icons.lock_open,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  hintText: 'Password',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            // Confirm Password Field
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 5,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextFormField(
+                                controller: RegisterCubit.get(
+                                  context,
+                                ).confirmPassword,
+                                obscureText: RegisterCubit.get(
+                                  context,
+                                ).confirmPasswordSecure,
+                                validator: AppValidator.validateRequired,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.lock,
+                                    color: Colors.grey[600],
+                                  ),
+                                  suffixIcon: IconButton(
+                                    onPressed: RegisterCubit.get(
+                                      context,
+                                    ).changeConfirmPasswordSecure,
+                                    icon: Icon(
+                                      RegisterCubit.get(
+                                            context,
+                                          ).confirmPasswordSecure
+                                          ? Icons.lock
+                                          : Icons.lock_open,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  hintText: 'Confirm Password',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 30),
+                            // Register Button
+                            state is RegisterLoadingState
+                                ? CircularProgressIndicator()
+                                : Container(
+                                    width: double.infinity,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary, // Green
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.primary.withOpacity(
+                                            0.3,
+                                          ),
+                                          blurRadius: 8,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed: RegisterCubit.get(
+                                        context,
+                                      ).onRegisterPressed,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Register',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                            SizedBox(height: 30),
+                            // Already Have An Account? Login
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Already Have An Account?',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                GestureDetector(
+                                  onTap: () => AppNavigator.goTo(
+                                    context,
+                                    const LoginView(),
+                                  ),
+                                  child: Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      color: Colors.grey[800],
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         ),

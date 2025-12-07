@@ -8,14 +8,14 @@ class getUserModel {
 
   getUserModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    users = json['user'] != null ? new UserModel.fromJson(json['user']) : null;
+    users = json['user'] != null ? UserModel.fromJson(json['user']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    if (this.users != null) {
-      data['user'] = this.users!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    if (users != null) {
+      data['user'] = users!.toJson();
     }
 
     return data;
