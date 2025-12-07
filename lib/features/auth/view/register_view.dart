@@ -127,8 +127,8 @@ class RegisterView extends StatelessWidget {
                                     ).changePasswordSecure,
                                     icon: Icon(
                                       RegisterCubit.get(context).passwordSecure
-                                          ? Icons.lock
-                                          : Icons.lock_open,
+                                          ? Icons.lock_open
+                                          : Icons.lock,
                                       color: Colors.grey[600],
                                     ),
                                   ),
@@ -181,8 +181,8 @@ class RegisterView extends StatelessWidget {
                                       RegisterCubit.get(
                                             context,
                                           ).confirmPasswordSecure
-                                          ? Icons.lock
-                                          : Icons.lock_open,
+                                          ? Icons.lock_open
+                                          : Icons.lock,
                                       color: Colors.grey[600],
                                     ),
                                   ),
