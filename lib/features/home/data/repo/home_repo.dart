@@ -1,56 +1,53 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '/features/home/data/models/get_tasks_response_model.dart';
-import '/features/home/data/models/tassk_model.dart';
-import '/features/home/data/models/get_user_response_model.dart';
-import 'package:todo/features/auth/data/models/user_model.dart';
+import '/core/error/failures.dart';
+import '/features/auth/domain/entities/user.dart';
+import '/features/home/data/datasources/home_remote_data_source.dart';
+import '/features/home/domain/entities/task.dart';
+import '/features/home/domain/repositories/home_repository.dart';
 
-class HomeRepo {
-  Dio dio = Dio();
-  Future<Either<String, List<TaskModel>>> getTasks() async {
+class HomeRepositoryImpl implements HomeRepository {
+  final HomeRemoteDataSource remoteDataSource;
+
+  HomeRepositoryImpl(this.remoteDataSource);
+
+  @override
+  Future<Either<Failure, List<Task>>> getTasks() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? accessToken = prefs.getString('accsess_token');
-      var response = await dio.get(
-        'https://ntitodo-production-1fa0.up.railway.app/api/my_tasks',
-        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
-      );
-      var getTasksModel = GetTasksReponseModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-      print(' tasks:  ${getTasksModel.tasks}');
-      return right(getTasksModel.tasks ?? []);
+      final result = await remoteDataSource.getTasks();
+      return Right(result);
     } on DioException catch (e) {
       if (e.response?.data != null) {
-        return left(e.response!.data['message'] ?? '');
+        return Left(
+          ServerFailure(e.response!.data['message'] ?? 'Failed to get tasks'),
+        );
       } else {
-        return left('something went wrong'); // TODO: Handle this case.
+        return const Left(
+          NetworkFailure('Network error. Please check your connection.'),
+        );
       }
     } catch (e) {
-      return left('something went wrong');
+      return const Left(ServerFailure('An unexpected error occurred'));
     }
   }
 
-  Future<Either<String, UserModel>> getusers() async {
+  @override
+  Future<Either<Failure, User>> getUser() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? accessToken = prefs.getString('accsess_token');
-      var response = await dio.get(
-        'https://ntitodo-production-1fa0.up.railway.app/api/user',
-        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
-      );
-      var user = GetUserResponseModel.fromJson(response.data as Map<String, dynamic>);
-
-      return right(user.users!);
+      final result = await remoteDataSource.getUser();
+      return Right(result);
     } on DioException catch (e) {
       if (e.response?.data != null) {
-        return left(e.response!.data['message'] ?? '');
+        return Left(
+          ServerFailure(e.response!.data['message'] ?? 'Failed to get user'),
+        );
       } else {
-        return left('something went wrong'); // TODO: Handle this case.
+        return const Left(
+          NetworkFailure('Network error. Please check your connection.'),
+        );
       }
     } catch (e) {
-      return left('something went wrong');
+      return const Left(ServerFailure('An unexpected error occurred'));
     }
   }
 }

@@ -1,10 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '/core/network/dio_client.dart';
+import '/core/usecases/usecase.dart';
 import '/core/utils/app_colors.dart';
 import '/features/home/cubit/get_tasks_cubit/get_tsks_cubit.dart';
 import '/features/home/cubit/get_tasks_cubit/get_tsks_state.dart';
 import '/features/home/cubit/get_user_cubit/get_user_cubit.dart';
+import '/features/home/data/datasources/home_remote_data_source.dart';
+import '/features/home/data/repo/home_repo.dart';
+import '/features/home/domain/usecases/get_tasks_usecase.dart';
+import '/features/home/domain/usecases/get_user_usecase.dart';
 import 'package:todo/features/home/cubit/get_user_cubit/get_user_state.dart';
 
 class HomeView extends StatelessWidget {
@@ -12,13 +18,25 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dioClient = DioClient();
+    final homeDataSource = HomeRemoteDataSourceImpl(dioClient);
+    final homeRepository = HomeRepositoryImpl(homeDataSource);
+
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5), // Light grey background
       body: SafeArea(
         child: MultiBlocProvider(
           providers: [
-            BlocProvider(create: (context) => GetUserCubit()..getusers()),
-            BlocProvider(create: (context) => GetTasksCubit()..getTasks()),
+            BlocProvider(
+              create: (context) => GetUserCubit(
+                GetUserUseCase(homeRepository),
+              )..getusers(),
+            ),
+            BlocProvider(
+              create: (context) => GetTasksCubit(
+                GetTasksUseCase(homeRepository),
+              )..getTasks(),
+            ),
           ],
           child: Builder(
             builder: (context) {

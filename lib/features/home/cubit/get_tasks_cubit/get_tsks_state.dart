@@ -1,4 +1,4 @@
-import '/features/home/data/models/tassk_model.dart';
+import '/features/home/domain/entities/task.dart';
 
 abstract class GetTasksState {}
 
@@ -7,11 +7,11 @@ class GetTasksInitialState extends GetTasksState {}
 class GetTasksLoadingState extends GetTasksState {}
 
 class GetTasksSuccessState extends GetTasksState {
-  List<TaskModel> tasks;
+  final List<Task> tasks;
   GetTasksSuccessState({required this.tasks});
 }
 
 class GetTasksErrorState extends GetTasksState {
-  String error;
+  final String error;
   GetTasksErrorState({required this.error});
 }

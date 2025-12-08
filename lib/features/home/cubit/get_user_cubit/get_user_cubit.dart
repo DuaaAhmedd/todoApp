@@ -1,18 +1,23 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '/features/home/data/repo/home_repo.dart';
+import '/core/usecases/usecase.dart';
+import '/features/home/domain/usecases/get_user_usecase.dart';
 import '/features/home/cubit/get_user_cubit/get_user_state.dart';
 
 class GetUserCubit extends Cubit<GetUserState> {
-  GetUserCubit() : super(GetUserInitialState());
+  final GetUserUseCase getUserUseCase;
+
+  GetUserCubit(this.getUserUseCase) : super(GetUserInitialState());
+
   static GetUserCubit get(context) => BlocProvider.of(context);
 
   void getusers() async {
     emit(GetUserLoadingState());
-    HomeRepo repo = HomeRepo();
-    var result = await repo.getusers();
+
+    final result = await getUserUseCase(NoParams());
+
     result.fold(
-      (error) => emit(GetUserErrorState(error: error)),
-      (users) => emit(GetUserSuccessState(users: users)),
+      (failure) => emit(GetUserErrorState(error: failure.message)),
+      (user) => emit(GetUserSuccessState(users: user)),
     );
   }
 }

@@ -1,20 +1,23 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '/features/home/data/models/tassk_model.dart';
-import '/features/home/data/repo/home_repo.dart';
-
+import '/core/usecases/usecase.dart';
+import '/features/home/domain/usecases/get_tasks_usecase.dart';
 import '/features/home/cubit/get_tasks_cubit/get_tsks_state.dart';
 
 class GetTasksCubit extends Cubit<GetTasksState> {
-  GetTasksCubit() : super(GetTasksInitialState());
+  final GetTasksUseCase getTasksUseCase;
+
+  GetTasksCubit(this.getTasksUseCase) : super(GetTasksInitialState());
+
   static GetTasksCubit get(context) => BlocProvider.of(context);
 
   void getTasks() async {
     emit(GetTasksLoadingState());
-    HomeRepo repo = HomeRepo();
-    var result = await repo.getTasks();
+
+    final result = await getTasksUseCase(NoParams());
+
     result.fold(
-      (error) => emit(GetTasksErrorState(error: error)),
-      (List<TaskModel> tasks) => emit(GetTasksSuccessState(tasks: tasks)),
+      (failure) => emit(GetTasksErrorState(error: failure.message)),
+      (tasks) => emit(GetTasksSuccessState(tasks: tasks)),
     );
   }
 }
