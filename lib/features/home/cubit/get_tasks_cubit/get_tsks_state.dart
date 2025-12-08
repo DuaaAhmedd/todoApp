@@ -7,11 +7,11 @@ class GetTasksInitialState extends GetTasksState {}
 class GetTasksLoadingState extends GetTasksState {}
 
 class GetTasksSuccessState extends GetTasksState {
-  List<TaskModel> tasks;
+  final List<TaskModel> tasks;
   GetTasksSuccessState({required this.tasks});
 }
 
 class GetTasksErrorState extends GetTasksState {
-  String error;
+  final String error;
   GetTasksErrorState({required this.error});
 }

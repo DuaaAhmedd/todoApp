@@ -258,8 +258,6 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 }
-
-  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => LoginCubit(),
