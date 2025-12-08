@@ -57,11 +57,12 @@ class HomeView extends StatelessWidget {
         },
         backgroundColor: AppColors.primary,
         child: Container(
+          padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(Icons.add, color: AppColors.primary),
+          child: Icon(Icons.add, color: AppColors.primary, size: 24),
         ),
       ),
     );
