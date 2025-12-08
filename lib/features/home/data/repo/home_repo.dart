@@ -37,10 +37,10 @@ class HomeRepo {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       String? accessToken = prefs.getString('accsess_token');
       var response = await dio.get(
-        'https://ntitodo-production-1fa0.up.railway.app/api/my_tasks',
+        'https://ntitodo-production-1fa0.up.railway.app/api/user',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
-      var user = getUserModel.fromJson(response.data as Map<String, dynamic>);
+      var user = GetUserResponseModel.fromJson(response.data as Map<String, dynamic>);
 
       return right(user.users!);
     } on DioException catch (e) {
