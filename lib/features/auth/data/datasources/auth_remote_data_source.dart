@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '/core/network/api_constants.dart';
 import '/core/network/dio_client.dart';
+import '/features/auth/data/datasources/auth_local_data_source.dart';
 import '/features/auth/data/models/basic_response_model.dart';
 import '/features/auth/data/models/login_response_model.dart';
 import '/features/auth/data/models/user_model.dart';
@@ -19,8 +20,9 @@ abstract class AuthRemoteDataSource {
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final DioClient dioClient;
+  final AuthLocalDataSource localDataSource;
 
-  AuthRemoteDataSourceImpl(this.dioClient);
+  AuthRemoteDataSourceImpl(this.dioClient, this.localDataSource);
 
   @override
   Future<String> register({
@@ -73,7 +75,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (loginModel.status == true && loginModel.user != null) {
-        // Save tokens (will be handled by local data source)
+        // Save tokens
+        if (loginModel.accessToken != null &&
+            loginModel.refreshToken != null) {
+          await localDataSource.saveTokens(
+            accessToken: loginModel.accessToken!,
+            refreshToken: loginModel.refreshToken!,
+          );
+        }
         return loginModel.user!;
       } else {
         throw DioException(

@@ -1,4 +1,5 @@
 import '/core/network/dio_client.dart';
+import '/features/auth/data/datasources/auth_local_data_source.dart';
 import '/features/auth/data/datasources/auth_remote_data_source.dart';
 import '/features/auth/data/repo/auth_repo.dart';
 import '/features/auth/domain/repositories/auth_repository.dart';
@@ -19,6 +20,7 @@ class ServiceLocator {
   late DioClient _dioClient;
 
   // Auth
+  late AuthLocalDataSource _authLocalDataSource;
   late AuthRemoteDataSource _authRemoteDataSource;
   late AuthRepository _authRepository;
   late LoginUseCase _loginUseCase;
@@ -35,7 +37,11 @@ class ServiceLocator {
     _dioClient = DioClient();
 
     // Auth
-    _authRemoteDataSource = AuthRemoteDataSourceImpl(_dioClient);
+    _authLocalDataSource = AuthLocalDataSourceImpl();
+    _authRemoteDataSource = AuthRemoteDataSourceImpl(
+      _dioClient,
+      _authLocalDataSource,
+    );
     _authRepository = AuthRepositoryImpl(_authRemoteDataSource);
     _loginUseCase = LoginUseCase(_authRepository);
     _registerUseCase = RegisterUseCase(_authRepository);
@@ -53,4 +59,5 @@ class ServiceLocator {
   RegisterUseCase get registerUseCase => _registerUseCase;
   GetTasksUseCase get getTasksUseCase => _getTasksUseCase;
   GetUserUseCase get getUserUseCase => _getUserUseCase;
+  AuthLocalDataSource get authLocalDataSource => _authLocalDataSource;
 }
