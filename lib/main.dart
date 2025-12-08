@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'core/di/service_locator.dart';
 import 'core/utils/app_colors.dart';
 
 import 'features/auth/view/register_view.dart';
 
 void main() {
+  // Initialize dependency injection
+  ServiceLocator().init();
+  
   runApp(const MyApp());
 }
 

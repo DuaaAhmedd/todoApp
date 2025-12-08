@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '/core/di/service_locator.dart';
 import '/core/helper/app_navigator.dart';
 import '/core/helper/app_popup.dart';
 import '/core/helper/app_validator.dart';
-import '/core/network/dio_client.dart';
 import '/core/utils/app_colors.dart';
-import '/features/auth/data/datasources/auth_remote_data_source.dart';
-import '/features/auth/data/repo/auth_repo.dart';
-import '/features/auth/domain/usecases/login_usecase.dart';
 import 'package:todo/features/home/view/home_view.dart';
 import '../cubit/login_cubit/login_cubit.dart';
 import '../cubit/login_cubit/login_state.dart';
@@ -35,15 +32,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LoginCubit(
-        LoginUseCase(
-          AuthRepositoryImpl(
-            AuthRemoteDataSourceImpl(
-              DioClient(),
-            ),
-          ),
-        ),
-      ),
+      create: (context) => LoginCubit(ServiceLocator().loginUseCase),
       child: Scaffold(
         body: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {
