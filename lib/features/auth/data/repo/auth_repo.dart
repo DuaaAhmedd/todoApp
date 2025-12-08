@@ -1,74 +1,64 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import '/features/auth/data/models/basic_response_model.dart';
-import '/features/auth/data/models/login_response_model.dart';
-import '/features/auth/data/models/user_model.dart';
+import '/core/error/failures.dart';
+import '/features/auth/data/datasources/auth_remote_data_source.dart';
+import '/features/auth/domain/entities/user.dart';
+import '/features/auth/domain/repositories/auth_repository.dart';
 
-class AuthRepo {
-  Dio dio = Dio(
-    BaseOptions(
-      connectTimeout: Duration(seconds: 5),
-      receiveTimeout: Duration(seconds: 5),
-      sendTimeout: Duration(seconds: 5),
-    ),
-  );
-  Future<Either<String, String>> register({
+class AuthRepositoryImpl implements AuthRepository {
+  final AuthRemoteDataSource remoteDataSource;
+
+  AuthRepositoryImpl(this.remoteDataSource);
+
+  @override
+  Future<Either<Failure, String>> register({
     required String username,
     required String password,
   }) async {
     try {
-      var response = await dio.post(
-        'https://ntitodo-production-1fa0.up.railway.app/api/register',
-        data: FormData.fromMap({'username': username, 'password': password}),
+      final result = await remoteDataSource.register(
+        username: username,
+        password: password,
       );
-
-      var basicResponseModel = BasicResponseModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-      if (basicResponseModel.status == true) {
-        return right(basicResponseModel.message ?? '');
-      } else {
-        return left(basicResponseModel.message ?? '');
-      }
+      return Right(result);
     } on DioException catch (e) {
       if (e.response?.data != null) {
-        return left(e.response!.data['message'] ?? '');
+        return Left(
+          ServerFailure(e.response!.data['message'] ?? 'Registration failed'),
+        );
       } else {
-        return left('something went wrong'); // TODO: Handle this case.
+        return const Left(
+          NetworkFailure('Network error. Please check your connection.'),
+        );
       }
     } catch (e) {
-      return left('something went wrong');
+      return const Left(ServerFailure('An unexpected error occurred'));
     }
   }
 
-  Future<Either<String, UserModel>> login({
+  @override
+  Future<Either<Failure, User>> login({
     required String username,
     required String password,
   }) async {
     try {
-      var response = await dio.post(
-        'https://ntitodo-production-1fa0.up.railway.app/api/login',
-        data: FormData.fromMap({'username': username, 'password': password}),
+      final result = await remoteDataSource.login(
+        username: username,
+        password: password,
       );
-      var loginModel = LoginResponseModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-      // TODO: Save tokens
-      // loginModel.accessToken;
-      // loginModel.refreshToken;
-      if (loginModel.status == true && loginModel.user != null) {
-        return right(loginModel.user!);
-      } else {
-        throw Exception;
-      }
+      return Right(result);
     } on DioException catch (e) {
       if (e.response?.data != null) {
-        return left(e.response!.data['message'] ?? '');
+        return Left(
+          ServerFailure(e.response!.data['message'] ?? 'Login failed'),
+        );
       } else {
-        return left('something went wrong'); // TODO: Handle this case.
+        return const Left(
+          NetworkFailure('Network error. Please check your connection.'),
+        );
       }
     } catch (e) {
-      return left('something went wrong');
+      return const Left(ServerFailure('An unexpected error occurred'));
     }
   }
 }

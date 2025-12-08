@@ -1,31 +1,28 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '/features/auth/data/repo/auth_repo.dart';
-
+import '/features/auth/domain/usecases/register_usecase.dart';
 import 'register_state.dart';
 
 class RegisterCubit extends Cubit<RegisterState> {
-  RegisterCubit() : super(RegisterInitialState());
+  final RegisterUseCase registerUseCase;
+
+  RegisterCubit(this.registerUseCase) : super(RegisterInitialState());
+
   static RegisterCubit get(context) => BlocProvider.of(context);
 
-  var username = TextEditingController();
-  var password = TextEditingController();
-  var confirmPassword = TextEditingController();
-  var formKey = GlobalKey<FormState>();
+  void register({
+    required String username,
+    required String password,
+  }) async {
+    emit(RegisterLoadingState());
 
-  void onRegisterPressed() async {
-    if (formKey.currentState?.validate() == true) {
-      emit(RegisterLoadingState());
-      AuthRepo repo = AuthRepo();
-      var result = await repo.register(
-        username: username.text,
-        password: password.text,
-      );
-      result.fold(
-        (String error) => emit(RegisterErrorState(error)),
-        (String message) => emit(RegisterSuccessState(message)),
-      );
-    }
+    final result = await registerUseCase(
+      RegisterParams(username: username, password: password),
+    );
+
+    result.fold(
+      (failure) => emit(RegisterErrorState(failure.message)),
+      (message) => emit(RegisterSuccessState(message)),
+    );
   }
 
   bool passwordSecure = true;

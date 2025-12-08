@@ -1,14 +1,18 @@
-class UserModel {
-  int? id;
-  String? imagePath;
-  String? username;
+import '/features/auth/domain/entities/user.dart';
 
-  UserModel({this.id, this.imagePath, this.username});
+class UserModel extends User {
+  const UserModel({
+    super.id,
+    super.imagePath,
+    super.username,
+  });
 
-  UserModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    imagePath = json['image_path'];
-    username = json['username'];
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'],
+      imagePath: json['image_path'],
+      username: json['username'],
+    );
   }
 
   Map<String, dynamic> toJson() {

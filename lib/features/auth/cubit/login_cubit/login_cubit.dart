@@ -1,31 +1,29 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '/features/auth/data/models/user_model.dart';
-import '/features/auth/data/repo/auth_repo.dart';
-
+import '/features/auth/domain/entities/user.dart';
+import '/features/auth/domain/usecases/login_usecase.dart';
 import 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
-  LoginCubit() : super(LoginInitialState());
+  final LoginUseCase loginUseCase;
+
+  LoginCubit(this.loginUseCase) : super(LoginInitialState());
+
   static LoginCubit get(context) => BlocProvider.of(context);
 
-  var username = TextEditingController();
-  var password = TextEditingController();
-  var formKey = GlobalKey<FormState>();
+  void login({
+    required String username,
+    required String password,
+  }) async {
+    emit(LoginLoadingState());
 
-  void onLoginPressed() async {
-    if (formKey.currentState?.validate() == true) {
-      emit(LoginLoadingState());
-      AuthRepo repo = AuthRepo();
-      var result = await repo.login(
-        username: username.text,
-        password: password.text,
-      );
-      result.fold(
-        (String error) => emit(LoginErrorState(error)),
-        (UserModel user) => emit(LoginSuccessState(user)),
-      );
-    }
+    final result = await loginUseCase(
+      LoginParams(username: username, password: password),
+    );
+
+    result.fold(
+      (failure) => emit(LoginErrorState(failure.message)),
+      (user) => emit(LoginSuccessState(user)),
+    );
   }
 
   bool passwordSecure = true;

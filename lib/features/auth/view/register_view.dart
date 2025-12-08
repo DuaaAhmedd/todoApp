@@ -3,14 +3,331 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '/core/helper/app_navigator.dart';
 import '/core/helper/app_popup.dart';
 import '/core/helper/app_validator.dart';
+import '/core/network/dio_client.dart';
 import '/core/utils/app_colors.dart';
 import '/features/auth/cubit/register_cubit/register_cubit.dart';
+import '/features/auth/data/datasources/auth_remote_data_source.dart';
+import '/features/auth/data/repo/auth_repo.dart';
+import '/features/auth/domain/usecases/register_usecase.dart';
 
 import '../cubit/register_cubit/register_state.dart';
 import 'login_view.dart';
 
-class RegisterView extends StatelessWidget {
+class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
+
+  @override
+  State<RegisterView> createState() => _RegisterViewState();
+}
+
+class _RegisterViewState extends State<RegisterView> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => RegisterCubit(
+        RegisterUseCase(
+          AuthRepositoryImpl(
+            AuthRemoteDataSourceImpl(
+              DioClient(),
+            ),
+          ),
+        ),
+      ),
+      child: Scaffold(
+        body: BlocConsumer<RegisterCubit, RegisterState>(
+          listener: (context, state) {
+            if (state is RegisterErrorState) {
+              SnackBarPopUp().show(
+                context: context,
+                message: state.error,
+                state: PopUpState.error,
+              );
+            } else if (state is RegisterSuccessState) {
+              SnackBarPopUp().show(
+                context: context,
+                message: 'Registered successfully',
+                state: PopUpState.success,
+              );
+
+              AppNavigator.goTo(context, const LoginView());
+            }
+          },
+          builder: (context, state) {
+            return Column(
+              children: [
+                // Palestinian Flag Background - Upper 40%
+                Expanded(
+                  flex: 4,
+                  child: Image.asset(
+                    'assets/flag.png',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                ),
+                // Form Section - Lower 60%
+                Expanded(
+                  flex: 6,
+                  child: Container(
+                    color: Color(0xFFF5F5F5), // Light grey background
+                    child: Form(
+                      key: _formKey,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 30,
+                        ),
+                        child: Column(
+                          children: [
+                            // Username Field
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 5,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextFormField(
+                                controller: _usernameController,
+                                validator: AppValidator.validateRequired,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.person,
+                                    color: Colors.grey[600],
+                                  ),
+                                  hintText: 'Username',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            // Password Field
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 5,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextFormField(
+                                controller: _passwordController,
+                                obscureText: RegisterCubit.get(
+                                  context,
+                                ).passwordSecure,
+                                validator: AppValidator.validateRequired,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.lock,
+                                    color: Colors.grey[600],
+                                  ),
+                                  suffixIcon: IconButton(
+                                    onPressed: RegisterCubit.get(
+                                      context,
+                                    ).changePasswordSecure,
+                                    icon: Icon(
+                                      RegisterCubit.get(context).passwordSecure
+                                          ? Icons.lock_open
+                                          : Icons.lock,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  hintText: 'Password',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            // Confirm Password Field
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 5,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextFormField(
+                                controller: _confirmPasswordController,
+                                obscureText: RegisterCubit.get(
+                                  context,
+                                ).confirmPasswordSecure,
+                                validator: (value) {
+                                  final required =
+                                      AppValidator.validateRequired(value);
+                                  if (required != null) return required;
+                                  if (value != _passwordController.text) {
+                                    return 'Passwords do not match';
+                                  }
+                                  return null;
+                                },
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.lock,
+                                    color: Colors.grey[600],
+                                  ),
+                                  suffixIcon: IconButton(
+                                    onPressed: RegisterCubit.get(
+                                      context,
+                                    ).changeConfirmPasswordSecure,
+                                    icon: Icon(
+                                      RegisterCubit.get(
+                                            context,
+                                          ).confirmPasswordSecure
+                                          ? Icons.lock_open
+                                          : Icons.lock,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  hintText: 'Confirm Password',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 30),
+                            // Register Button
+                            state is RegisterLoadingState
+                                ? CircularProgressIndicator()
+                                : Container(
+                                    width: double.infinity,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary, // Green
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.primary.withOpacity(
+                                            0.3,
+                                          ),
+                                          blurRadius: 8,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        if (_formKey.currentState?.validate() ==
+                                            true) {
+                                          RegisterCubit.get(context).register(
+                                            username: _usernameController.text,
+                                            password: _passwordController.text,
+                                          );
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Register',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                            SizedBox(height: 30),
+                            // Already Have An Account? Login
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Already Have An Account?',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(width: 5),
+                                GestureDetector(
+                                  onTap: () => AppNavigator.goTo(
+                                    context,
+                                    const LoginView(),
+                                  ),
+                                  child: Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      color: Colors.grey[800],
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {

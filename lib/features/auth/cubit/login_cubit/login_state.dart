@@ -1,4 +1,4 @@
-import '/features/auth/data/models/user_model.dart';
+import '/features/auth/domain/entities/user.dart';
 
 abstract class LoginState {}
 
@@ -9,7 +9,7 @@ class LoginPasswordChangedVisibilityState extends LoginState {}
 class LoginLoadingState extends LoginState {}
 
 class LoginSuccessState extends LoginState {
-  final UserModel user;
+  final User user;
   LoginSuccessState(this.user);
 }
 

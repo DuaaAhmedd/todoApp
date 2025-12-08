@@ -3,19 +3,47 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '/core/helper/app_navigator.dart';
 import '/core/helper/app_popup.dart';
 import '/core/helper/app_validator.dart';
+import '/core/network/dio_client.dart';
 import '/core/utils/app_colors.dart';
+import '/features/auth/data/datasources/auth_remote_data_source.dart';
+import '/features/auth/data/repo/auth_repo.dart';
+import '/features/auth/domain/usecases/login_usecase.dart';
 import 'package:todo/features/home/view/home_view.dart';
 import '../cubit/login_cubit/login_cubit.dart';
 import '../cubit/login_cubit/login_state.dart';
 import 'register_view.dart';
 
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
   const LoginView({super.key});
+
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LoginCubit(),
+      create: (context) => LoginCubit(
+        LoginUseCase(
+          AuthRepositoryImpl(
+            AuthRemoteDataSourceImpl(
+              DioClient(),
+            ),
+          ),
+        ),
+      ),
       child: Scaffold(
         body: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {
@@ -53,7 +81,7 @@ class LoginView extends StatelessWidget {
                   child: Container(
                     color: Color(0xFFF5F5F5), // Light grey background
                     child: Form(
-                      key: LoginCubit.get(context).formKey,
+                      key: _formKey,
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
@@ -75,7 +103,7 @@ class LoginView extends StatelessWidget {
                                 ],
                               ),
                               child: TextFormField(
-                                controller: LoginCubit.get(context).username,
+                                controller: _usernameController,
                                 validator: AppValidator.validateRequired,
                                 decoration: InputDecoration(
                                   prefixIcon: Icon(
@@ -111,7 +139,7 @@ class LoginView extends StatelessWidget {
                                 ],
                               ),
                               child: TextFormField(
-                                controller: LoginCubit.get(context).password,
+                                controller: _passwordController,
                                 obscureText: LoginCubit.get(
                                   context,
                                 ).passwordSecure,
@@ -167,9 +195,15 @@ class LoginView extends StatelessWidget {
                                       ],
                                     ),
                                     child: ElevatedButton(
-                                      onPressed: LoginCubit.get(
-                                        context,
-                                      ).onLoginPressed,
+                                      onPressed: () {
+                                        if (_formKey.currentState?.validate() ==
+                                            true) {
+                                          LoginCubit.get(context).login(
+                                            username: _usernameController.text,
+                                            password: _passwordController.text,
+                                          );
+                                        }
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
                                         shadowColor: Colors.transparent,
