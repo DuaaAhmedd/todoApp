@@ -1,88 +1,166 @@
 # Todo App
 
-A Flutter todo application built with Clean Architecture and MVVM pattern.
+A Flutter todo application refactored to follow Clean Architecture and MVVM principles.
 
-## Architecture
+## Architecture Overview
 
-This project follows Clean Architecture principles with MVVM (Model-View-ViewModel) pattern using BLoC/Cubit for state management.
+This project follows Clean Architecture principles with MVVM (Model-View-ViewModel) pattern using BLoC/Cubit for state management, **refactored within the existing file structure**.
+
+### Key Improvements
+
+#### 1. Repository Pattern Enhancement
+- **Singleton Pattern**: Repositories use singleton pattern to ensure single instance
+- **Centralized Configuration**: API base URLs and endpoints centralized in repositories
+- **Better Error Handling**: Comprehensive error handling with user-friendly messages
+- **Token Management**: Automatic token storage and retrieval for authenticated requests
+
+#### 2. MVVM Pattern Implementation
+- **Separation of Concerns**: UI controllers moved from Cubits (ViewModel) to Views
+- **Clean ViewModels**: Cubits now focus purely on business logic
+- **Dependency Injection**: Repositories can be injected for testing
+
+#### 3. Code Quality
+- **Fixed Typo**: Corrected `accsess_token` to `access_token`
+- **Removed TODOs**: Implemented token saving functionality
+- **Better Naming**: Clear, descriptive variable names
+- **Documentation**: Added comments explaining architecture decisions
 
 ### Project Structure
 
 ```
 lib/
-├── core/                          # Core functionality shared across features
-│   ├── error/                     # Error handling (Failures)
-│   ├── network/                   # Network configuration (API constants, DioClient)
-│   ├── usecases/                  # Base UseCase class
-│   ├── utils/                     # Utilities (Colors, etc.)
-│   ├── helper/                    # Helper classes (Navigation, Validation, Popups)
+├── core/                          # Shared functionality
+│   ├── helper/                    # Navigation, validation, popups
+│   ├── utils/                     # Colors, constants
 │   └── widgets/                   # Reusable widgets
-├── features/                      # Feature modules
+├── features/
 │   ├── auth/                      # Authentication feature
-│   │   ├── data/                  # Data layer
-│   │   │   ├── datasources/       # Remote data sources
+│   │   ├── cubit/                 # ViewModels (LoginCubit, RegisterCubit)
+│   │   ├── data/
 │   │   │   ├── models/            # Data models
-│   │   │   └── repo/              # Repository implementations
-│   │   ├── domain/                # Domain layer
-│   │   │   ├── entities/          # Business entities
-│   │   │   ├── repositories/      # Repository interfaces
-│   │   │   └── usecases/          # Use cases
-│   │   ├── cubit/                 # Presentation layer - State management
-│   │   └── view/                  # Presentation layer - UI
-│   └── home/                      # Home feature
-│       ├── data/                  # Data layer
-│       ├── domain/                # Domain layer
-│       ├── cubit/                 # Presentation layer - State management
-│       └── view/                  # Presentation layer - UI
+│   │   │   └── repo/              # Repository with business logic
+│   │   └── view/                  # UI layer with controllers
+│   └── home/                      # Home/Tasks feature
+│       ├── cubit/                 # ViewModels (GetTasksCubit, GetUserCubit)
+│       ├── data/
+│       │   ├── models/            # Data models
+│       │   └── repo/              # Repository with business logic
+│       └── view/                  # UI layer
 └── main.dart                      # Application entry point
 ```
 
-### Clean Architecture Layers
+### Architecture Principles Applied
 
-#### 1. Domain Layer (Business Logic)
-- **Entities**: Core business objects (User, Task)
-- **Repository Interfaces**: Contracts for data operations
-- **Use Cases**: Business logic operations
+#### Repository Pattern
+**Before:**
+```dart
+class AuthRepo {
+  Dio dio = Dio(BaseOptions(...));  // New instance each time
+  
+  Future<Either<String, UserModel>> login(...) async {
+    var response = await dio.post(
+      'https://ntitodo-production-1fa0.up.railway.app/api/login',  // Hardcoded URL
+      ...
+    );
+    // TODO: Save tokens
+  }
+}
+```
 
-#### 2. Data Layer (Data Management)
-- **Data Sources**: API clients and local storage
-- **Models**: Data transfer objects extending domain entities
-- **Repository Implementations**: Concrete implementations of repository interfaces
+**After:**
+```dart
+class AuthRepo {
+  static final AuthRepo _instance = AuthRepo._internal();  // Singleton
+  factory AuthRepo() => _instance;
+  
+  static const String _baseUrl = '...';  // Centralized config
+  static const String _loginEndpoint = '/login';
+  
+  final Dio _dio = Dio(BaseOptions(baseUrl: _baseUrl, ...));
+  
+  Future<Either<String, UserModel>> login(...) async {
+    final response = await _dio.post(_loginEndpoint, ...);
+    await _saveTokens(...);  // Implemented token saving
+    return right(loginModel.user!);
+  }
+  
+  Future<void> _saveTokens({String? accessToken, String? refreshToken}) async {
+    // Token storage implementation
+  }
+}
+```
 
-#### 3. Presentation Layer (UI)
-- **Views**: Flutter widgets
-- **Cubits**: State management using BLoC pattern
-- **States**: UI state definitions
+#### MVVM Pattern
+**Before:**
+```dart
+class LoginCubit extends Cubit<LoginState> {
+  var username = TextEditingController();  // UI controller in ViewModel
+  var password = TextEditingController();
+  var formKey = GlobalKey<FormState>();
+  
+  void onLoginPressed() async {
+    if (formKey.currentState?.validate() == true) {  // UI validation in ViewModel
+      AuthRepo repo = AuthRepo();  // Direct instantiation
+      var result = await repo.login(username: username.text, ...);
+    }
+  }
+}
+```
 
-### Key Principles
+**After:**
+```dart
+class LoginCubit extends Cubit<LoginState> {
+  final AuthRepo _authRepo;
+  
+  LoginCubit({AuthRepo? authRepo})  // Dependency injection
+      : _authRepo = authRepo ?? AuthRepo();
+  
+  Future<void> login({  // Pure business logic
+    required String username,
+    required String password,
+  }) async {
+    emit(LoginLoadingState());
+    final result = await _authRepo.login(username: username, password: password);
+    result.fold(
+      (error) => emit(LoginErrorState(error)),
+      (user) => emit(LoginSuccessState(user)),
+    );
+  }
+}
 
-1. **Dependency Injection**: Dependencies are injected through constructors
-2. **Separation of Concerns**: Each layer has a specific responsibility
-3. **Testability**: Easy to test each layer independently
-4. **Scalability**: Easy to add new features following the same pattern
+// View manages its own controllers
+class _LoginViewState extends State<LoginView> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+}
+```
 
-### State Management
+### Benefits
 
-This app uses **flutter_bloc** package with Cubit for state management:
-- Cubits contain business logic and emit states
-- Views listen to state changes and rebuild accordingly
-- Controllers are managed in views, not in Cubits
+1. **Testability**: ViewModels can be tested with mock repositories
+2. **Maintainability**: Clear separation between UI and business logic
+3. **Scalability**: Easy to add new features following the same pattern
+4. **Code Quality**: Better error handling and user feedback
+5. **Performance**: Singleton repositories reduce memory overhead
 
-### Error Handling
+### Running the Project
 
-Uses **dartz** package for functional error handling:
-- `Either<Failure, Success>` for operations that can fail
-- Custom Failure classes (ServerFailure, NetworkFailure, CacheFailure)
+```bash
+flutter pub get
+flutter run
+```
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+This project is a Flutter application following Clean Architecture principles.
 
 For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+[online documentation](https://docs.flutter.dev/).

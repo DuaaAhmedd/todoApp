@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '/core/di/service_locator.dart';
 import '/core/utils/app_colors.dart';
 import '/features/home/cubit/get_tasks_cubit/get_tsks_cubit.dart';
 import '/features/home/cubit/get_tasks_cubit/get_tsks_state.dart';
@@ -18,14 +17,8 @@ class HomeView extends StatelessWidget {
       body: SafeArea(
         child: MultiBlocProvider(
           providers: [
-            BlocProvider(
-              create: (context) =>
-                  GetUserCubit(ServiceLocator().getUserUseCase)..getusers(),
-            ),
-            BlocProvider(
-              create: (context) =>
-                  GetTasksCubit(ServiceLocator().getTasksUseCase)..getTasks(),
-            ),
+            BlocProvider(create: (context) => GetUserCubit()..getusers()),
+            BlocProvider(create: (context) => GetTasksCubit()..getTasks()),
           ],
           child: Builder(
             builder: (context) {

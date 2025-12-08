@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '/core/di/service_locator.dart';
 import '/core/helper/app_navigator.dart';
 import '/core/helper/app_popup.dart';
 import '/core/helper/app_validator.dart';
@@ -10,6 +9,9 @@ import '/features/auth/cubit/register_cubit/register_cubit.dart';
 import '../cubit/register_cubit/register_state.dart';
 import 'login_view.dart';
 
+/// RegisterView - View layer for registration feature
+/// Manages UI controllers and user interactions
+/// Following MVVM pattern
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -18,6 +20,7 @@ class RegisterView extends StatefulWidget {
 }
 
 class _RegisterViewState extends State<RegisterView> {
+  // UI Controllers - managed in View layer
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -34,7 +37,7 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => RegisterCubit(ServiceLocator().registerUseCase),
+      create: (context) => RegisterCubit(),
       child: Scaffold(
         body: BlocConsumer<RegisterCubit, RegisterState>(
           listener: (context, state) {

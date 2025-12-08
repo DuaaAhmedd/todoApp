@@ -1,23 +1,27 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '/core/usecases/usecase.dart';
-import '/features/home/domain/usecases/get_user_usecase.dart';
+import '/features/home/data/repo/home_repo.dart';
 import '/features/home/cubit/get_user_cubit/get_user_state.dart';
 
+/// GetUserCubit - ViewModel for user profile feature
+/// Handles business logic for retrieving user information
 class GetUserCubit extends Cubit<GetUserState> {
-  final GetUserUseCase getUserUseCase;
+  final HomeRepo _homeRepo;
 
-  GetUserCubit(this.getUserUseCase) : super(GetUserInitialState());
+  GetUserCubit({HomeRepo? homeRepo})
+      : _homeRepo = homeRepo ?? HomeRepo(),
+        super(GetUserInitialState());
 
   static GetUserCubit get(context) => BlocProvider.of(context);
 
-  void getusers() async {
+  /// Fetch user information from repository
+  Future<void> getusers() async {
     emit(GetUserLoadingState());
 
-    final result = await getUserUseCase(NoParams());
+    final result = await _homeRepo.getusers();
 
     result.fold(
-      (failure) => emit(GetUserErrorState(error: failure.message)),
-      (user) => emit(GetUserSuccessState(users: user)),
+      (error) => emit(GetUserErrorState(error: error)),
+      (users) => emit(GetUserSuccessState(users: users)),
     );
   }
 }

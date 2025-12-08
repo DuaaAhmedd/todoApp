@@ -1,22 +1,24 @@
-import '/features/home/domain/entities/task.dart';
+class TaskModel {
+  String? createdAt;
+  String? description;
+  int? id;
+  String? imagePath;
+  String? title;
 
-class TaskModel extends Task {
-  const TaskModel({
-    super.createdAt,
-    super.description,
-    super.id,
-    super.imagePath,
-    super.title,
+  TaskModel({
+    this.createdAt,
+    this.description,
+    this.id,
+    this.imagePath,
+    this.title,
   });
 
-  factory TaskModel.fromJson(Map<String, dynamic> json) {
-    return TaskModel(
-      createdAt: json['created_at'],
-      description: json['description'],
-      id: json['id'],
-      imagePath: json['image_path'],
-      title: json['title'],
-    );
+  TaskModel.fromJson(Map<String, dynamic> json) {
+    createdAt = json['created_at'];
+    description = json['description'];
+    id = json['id'];
+    imagePath = json['image_path'];
+    title = json['title'];
   }
 
   Map<String, dynamic> toJson() {

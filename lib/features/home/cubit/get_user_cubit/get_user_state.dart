@@ -1,4 +1,4 @@
-import '/features/auth/domain/entities/user.dart';
+import 'package:todo/features/auth/data/models/user_model.dart';
 
 abstract class GetUserState {}
 
@@ -7,11 +7,11 @@ class GetUserInitialState extends GetUserState {}
 class GetUserLoadingState extends GetUserState {}
 
 class GetUserSuccessState extends GetUserState {
-  final User users;
+  final UserModel users;
   GetUserSuccessState({required this.users});
 }
 
 class GetUserErrorState extends GetUserState {
-  final String error;
+  String error;
   GetUserErrorState({required this.error});
 }
