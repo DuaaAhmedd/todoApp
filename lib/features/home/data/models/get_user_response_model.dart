@@ -1,12 +1,12 @@
 import 'package:todo/features/auth/data/models/user_model.dart';
 
-class getUserModel {
+class GetUserResponseModel {
   bool? status;
   UserModel? users;
 
-  getUserModel({this.status, this.users});
+  GetUserResponseModel({this.status, this.users});
 
-  getUserModel.fromJson(Map<String, dynamic> json) {
+  GetUserResponseModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     users = json['user'] != null ? UserModel.fromJson(json['user']) : null;
   }

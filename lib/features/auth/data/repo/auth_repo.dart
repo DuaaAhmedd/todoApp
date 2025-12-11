@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '/features/auth/data/models/basic_response_model.dart';
 import '/features/auth/data/models/login_response_model.dart';
 import '/features/auth/data/models/user_model.dart';
@@ -53,10 +54,14 @@ class AuthRepo {
       var loginModel = LoginResponseModel.fromJson(
         response.data as Map<String, dynamic>,
       );
-      // TODO: Save tokens
-      // loginModel.accessToken;
-      // loginModel.refreshToken;
-      if (loginModel.status == true && loginModel.user != null) {
+      if (loginModel.status == true &&
+          loginModel.user != null &&
+          loginModel.accessToken != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access_token', loginModel.accessToken!);
+        if (loginModel.refreshToken != null) {
+          await prefs.setString('refresh_token', loginModel.refreshToken!);
+        }
         return right(loginModel.user!);
       } else {
         throw Exception;

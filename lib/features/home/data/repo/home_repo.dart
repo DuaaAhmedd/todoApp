@@ -11,21 +11,34 @@ class HomeRepo {
   Future<Either<String, List<TaskModel>>> getTasks() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? accessToken = prefs.getString('accsess_token');
+      final String? accessToken = prefs.getString('access_token');
+      final int? userId = prefs.getInt('user_id');
+      if (accessToken == null) return left('not authorized');
+
       var response = await dio.get(
         'https://ntitodo-production-1fa0.up.railway.app/api/my_tasks',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
+
       var getTasksModel = GetTasksReponseModel.fromJson(
         response.data as Map<String, dynamic>,
       );
-      print(' tasks:  ${getTasksModel.tasks}');
-      return right(getTasksModel.tasks ?? []);
+
+      if (getTasksModel.status == true) {
+        final tasks = getTasksModel.tasks ?? [];
+        if (userId != null) {
+          final filtered = tasks.where((t) => t.userId == userId).toList();
+          return right(filtered);
+        }
+        return right(tasks);
+      } else {
+        return left('something went wrong');
+      }
     } on DioException catch (e) {
       if (e.response?.data != null) {
-        return left(e.response!.data['message'] ?? '');
+        return left(e.response!.data['message'] ?? 'something went wrong');
       } else {
-        return left('something went wrong'); // TODO: Handle this case.
+        return left('network error');
       }
     } catch (e) {
       return left('something went wrong');
@@ -35,19 +48,22 @@ class HomeRepo {
   Future<Either<String, UserModel>> getusers() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? accessToken = prefs.getString('accsess_token');
+      final String? accessToken = prefs.getString('access_token');
+      if (accessToken == null) return left('not authorized');
       var response = await dio.get(
-        'https://ntitodo-production-1fa0.up.railway.app/api/my_tasks',
+        'https://ntitodo-production-1fa0.up.railway.app/api/user',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
-      var user = getUserModel.fromJson(response.data as Map<String, dynamic>);
+      var user = GetUserResponseModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
 
       return right(user.users!);
     } on DioException catch (e) {
       if (e.response?.data != null) {
-        return left(e.response!.data['message'] ?? '');
+        return left(e.response!.data['message'] ?? 'something went wrong');
       } else {
-        return left('something went wrong'); // TODO: Handle this case.
+        return left('network error');
       }
     } catch (e) {
       return left('something went wrong');
