@@ -69,4 +69,68 @@ class HomeRepo {
       return left('something went wrong');
     }
   }
+
+  Future<Either<String, bool>> deleteTask(int taskId) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('access_token');
+      if (accessToken == null) return left('not authorized');
+
+      var response = await dio.delete(
+        'https://ntitodo-production-1fa0.up.railway.app/api/tasks/$taskId',
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return right(true);
+      } else {
+        return left('Failed to delete task');
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        return left(e.response!.data['message'] ?? 'Failed to delete task');
+      } else {
+        return left('network error');
+      }
+    } catch (e) {
+      return left('something went wrong');
+    }
+  }
+
+  Future<Either<String, TaskModel>> editTask(
+    int taskId,
+    String title,
+    String description,
+  ) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('access_token');
+      if (accessToken == null) return left('not authorized');
+
+      var response = await dio.put(
+        'https://ntitodo-production-1fa0.up.railway.app/api/tasks/$taskId',
+        data: {
+          'title': title,
+          'description': description,
+        },
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+      );
+
+      if (response.statusCode == 200) {
+        var taskData = response.data['task'] ?? response.data;
+        var updatedTask = TaskModel.fromJson(taskData as Map<String, dynamic>);
+        return right(updatedTask);
+      } else {
+        return left('Failed to update task');
+      }
+    } on DioException catch (e) {
+      if (e.response?.data != null) {
+        return left(e.response!.data['message'] ?? 'Failed to update task');
+      } else {
+        return left('network error');
+      }
+    } catch (e) {
+      return left('something went wrong');
+    }
+  }
 }
