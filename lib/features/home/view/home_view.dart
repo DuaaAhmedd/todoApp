@@ -40,6 +40,7 @@ class HomeView extends StatelessWidget {
   }
 
   void _deleteTask(BuildContext context, int taskId) {
+    final tasksCubit = GetTasksCubit.get(context);
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -54,7 +55,7 @@ class HomeView extends StatelessWidget {
                 message: 'Task deleted successfully',
                 state: PopUpState.success,
               );
-              GetTasksCubit.get(context).getTasks();
+              tasksCubit.getTasks();
             } else if (state is DeleteTaskErrorState) {
               Navigator.of(dialogContext).pop();
               SnackBarPopUp().show(
@@ -168,6 +169,7 @@ class HomeView extends StatelessWidget {
   }
 
   void _editTask(BuildContext context, int taskId, String title, String description) {
+    final tasksCubit = GetTasksCubit.get(context);
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -182,7 +184,7 @@ class HomeView extends StatelessWidget {
                 message: 'Task updated successfully',
                 state: PopUpState.success,
               );
-              GetTasksCubit.get(context).getTasks();
+              tasksCubit.getTasks();
             } else if (state is EditTaskErrorState) {
               Navigator.of(dialogContext).pop();
               SnackBarPopUp().show(

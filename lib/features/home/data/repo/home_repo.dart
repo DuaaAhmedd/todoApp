@@ -77,7 +77,7 @@ class HomeRepo {
       if (accessToken == null) return left('not authorized');
 
       var response = await dio.delete(
-        'https://ntitodo-production-1fa0.up.railway.app/api/my_tasks/$taskId',
+        'https://ntitodo-production-1fa0.up.railway.app/api/tasks/$taskId',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
 
@@ -108,7 +108,7 @@ class HomeRepo {
       if (accessToken == null) return left('not authorized');
 
       var response = await dio.put(
-        'https://ntitodo-production-1fa0.up.railway.app/api/my_tasks/$taskId',
+        'https://ntitodo-production-1fa0.up.railway.app/api/tasks/$taskId',
         data: {
           'title': title,
           'description': description,
@@ -117,9 +117,13 @@ class HomeRepo {
       );
 
       if (response.statusCode == 200) {
-        var taskData = response.data['task'] ?? response.data;
-        var updatedTask = TaskModel.fromJson(taskData as Map<String, dynamic>);
-        return right(updatedTask);
+        try {
+          var taskData = response.data['task'] ?? response.data;
+          var updatedTask = TaskModel.fromJson(taskData as Map<String, dynamic>);
+          return right(updatedTask);
+        } catch (parseError) {
+          return left('Error parsing response: $parseError');
+        }
       } else {
         return left('Failed to update task');
       }
@@ -130,7 +134,7 @@ class HomeRepo {
         return left('network error');
       }
     } catch (e) {
-      return left('something went wrong');
+      return left('Error: $e');
     }
   }
 }
