@@ -46,19 +46,19 @@ class HomeView extends StatelessWidget {
       builder: (dialogContext) => BlocProvider(
         create: (context) => DeleteTaskCubit()..deleteTask(taskId),
         child: BlocConsumer<DeleteTaskCubit, DeleteTaskState>(
-          listener: (context, state) {
+          listener: (blocContext, state) {
             if (state is DeleteTaskSuccessState) {
               Navigator.of(dialogContext).pop();
               SnackBarPopUp().show(
-                context: dialogContext,
+                context: context,
                 message: 'Task deleted successfully',
                 state: PopUpState.success,
               );
-              GetTasksCubit.get(dialogContext).getTasks();
+              GetTasksCubit.get(context).getTasks();
             } else if (state is DeleteTaskErrorState) {
               Navigator.of(dialogContext).pop();
               SnackBarPopUp().show(
-                context: dialogContext,
+                context: context,
                 message: state.error,
                 state: PopUpState.error,
               );
@@ -174,19 +174,19 @@ class HomeView extends StatelessWidget {
       builder: (dialogContext) => BlocProvider(
         create: (context) => EditTaskCubit()..editTask(taskId, title, description),
         child: BlocConsumer<EditTaskCubit, EditTaskState>(
-          listener: (context, state) {
+          listener: (blocContext, state) {
             if (state is EditTaskSuccessState) {
               Navigator.of(dialogContext).pop();
               SnackBarPopUp().show(
-                context: dialogContext,
+                context: context,
                 message: 'Task updated successfully',
                 state: PopUpState.success,
               );
-              GetTasksCubit.get(dialogContext).getTasks();
+              GetTasksCubit.get(context).getTasks();
             } else if (state is EditTaskErrorState) {
               Navigator.of(dialogContext).pop();
               SnackBarPopUp().show(
-                context: dialogContext,
+                context: context,
                 message: state.error,
                 state: PopUpState.error,
               );
