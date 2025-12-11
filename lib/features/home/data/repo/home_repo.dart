@@ -116,16 +116,24 @@ class HomeRepo {
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         try {
-          var taskData = response.data['task'] ?? response.data;
-          var updatedTask = TaskModel.fromJson(taskData as Map<String, dynamic>);
-          return right(updatedTask);
+          // Try to parse the response - it might be wrapped in 'task' key or be the task itself
+          var taskData = response.data;
+          if (taskData is Map<String, dynamic>) {
+            if (taskData.containsKey('task')) {
+              taskData = taskData['task'];
+            }
+            var updatedTask = TaskModel.fromJson(taskData as Map<String, dynamic>);
+            return right(updatedTask);
+          } else {
+            return left('Invalid response format');
+          }
         } catch (parseError) {
           return left('Error parsing response: $parseError');
         }
       } else {
-        return left('Failed to update task');
+        return left('Failed to update task (Status: ${response.statusCode})');
       }
     } on DioException catch (e) {
       if (e.response?.data != null) {

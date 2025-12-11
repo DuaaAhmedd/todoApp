@@ -47,7 +47,7 @@ class HomeView extends StatelessWidget {
       builder: (dialogContext) => BlocProvider(
         create: (context) => DeleteTaskCubit()..deleteTask(taskId),
         child: BlocConsumer<DeleteTaskCubit, DeleteTaskState>(
-          listener: (blocContext, state) {
+          listener: (blocContext, state) async {
             if (state is DeleteTaskSuccessState) {
               Navigator.of(dialogContext).pop();
               SnackBarPopUp().show(
@@ -55,6 +55,8 @@ class HomeView extends StatelessWidget {
                 message: 'Task deleted successfully',
                 state: PopUpState.success,
               );
+              // Add slight delay to ensure backend has processed the delete
+              await Future.delayed(Duration(milliseconds: 300));
               tasksCubit.getTasks();
             } else if (state is DeleteTaskErrorState) {
               Navigator.of(dialogContext).pop();
@@ -176,7 +178,7 @@ class HomeView extends StatelessWidget {
       builder: (dialogContext) => BlocProvider(
         create: (context) => EditTaskCubit()..editTask(taskId, title, description),
         child: BlocConsumer<EditTaskCubit, EditTaskState>(
-          listener: (blocContext, state) {
+          listener: (blocContext, state) async {
             if (state is EditTaskSuccessState) {
               Navigator.of(dialogContext).pop();
               SnackBarPopUp().show(
@@ -184,6 +186,8 @@ class HomeView extends StatelessWidget {
                 message: 'Task updated successfully',
                 state: PopUpState.success,
               );
+              // Add slight delay to ensure backend has processed the update
+              await Future.delayed(Duration(milliseconds: 300));
               tasksCubit.getTasks();
             } else if (state is EditTaskErrorState) {
               Navigator.of(dialogContext).pop();
