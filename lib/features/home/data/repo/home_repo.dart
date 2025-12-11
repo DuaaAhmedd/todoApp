@@ -77,7 +77,7 @@ class HomeRepo {
       if (accessToken == null) return left('not authorized');
 
       var response = await dio.delete(
-        'https://ntitodo-production-1fa0.up.railway.app/api/tasks/$taskId',
+        'https://ntitodo-production-1fa0.up.railway.app/api/my_tasks/$taskId',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
 
@@ -108,7 +108,7 @@ class HomeRepo {
       if (accessToken == null) return left('not authorized');
 
       var response = await dio.put(
-        'https://ntitodo-production-1fa0.up.railway.app/api/tasks/$taskId',
+        'https://ntitodo-production-1fa0.up.railway.app/api/my_tasks/$taskId',
         data: {
           'title': title,
           'description': description,
