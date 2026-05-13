@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'core/utils/app_colors.dart';
-
-import 'features/auth/view/register_view.dart';
+import 'views/todoV.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,11 +11,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-      ),
-      // TODO: check if user is logged in
-      home: RegisterView(),
+      debugShowCheckedModeBanner: false,
+      title: 'To-Do List App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const TodoView(),
     );
   }
 }
